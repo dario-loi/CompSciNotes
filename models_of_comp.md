@@ -92,6 +92,30 @@ $$
 
 This rule can be applied in any context in which it appears.
 
+#### Formal Substitution Definition
+
+We give a formal definition of substitution, $M[N/x]$:
+
+$$
+x[N/x] = N
+$$
+
+$$
+y[N/x] = y
+$$
+
+$$
+(M_1 M_2)[N/x] = M_1[N/x] M_2[N/x]
+$$
+
+$$
+(\lambda t . P)[N/x] = \lambda t . (P[N/x])
+$$
+
+As observed, substitution is always in place of *free* variables, therefore the abstraction is *not* replaced in the last rule.
+
+If we had an abstraction of type $\lambda x . P$ where $x \in P$, it would be best to rename $x$ in order to avoid name clashes.
+
 ### Types of Variables
 
 We distinguish two kinds of variables:
@@ -129,3 +153,61 @@ In general, a call-by-value-like semantic is preferrable when choosing evaluatio
 
 * Call By Value is *efficient*
 * Call By Name is *complete*, **if** the lambda term is normalizable
+
+## Second Lecture
+
+### Alpha Reduction
+
+Alpha reduction is the renaming of bound variables in a lambda term.
+
+$$
+\lambda x . M \rightarrow_\alpha \lambda y . M[y/x]
+$$
+
+This rule is used to avoid name clashes between bound variables.
+
+### Arithmetic Expressions
+
+The set of all valid arithmetic expressions has a very precise syntax. In general, a syntax can be viewed either as a tool for checking validity or as a generator of valid expressions (a grammar).
+
+We proceed to give a definition for arithmetic expressions
+
+$$
+\frac{x \in \mathbb{N}}{x \in \text{Expr}} \quad \text{(num)}
+$$
+
+$$
+\frac{X \in \text{Expr} \quad Y \in \text{Expr}}{X + Y \in \text{Expr}} \quad \text{(add)}
+$$
+
+$$
+\frac{X \in \text{Expr} \quad Y \in \text{Expr}}{X \times Y \in \text{Expr}} \quad \text{(mul)}
+$$
+Etc, etc... for all the other binary operations.
+
+From this, we can successfully decompose any arithmetic expression into a syntactic tree.
+With this set of rules, we have a slight problem: we can't represent negative numbers. We could solve this either by adding a rule for unary minus, or by specifying the num rule over $\mathbb{Z}$ instead of $\mathbb{N}$.
+
+### Combinators
+
+We define three combinators:
+
+$$
+S = \lambda x y z. x z (y z)
+$$
+
+$$
+K = \lambda x y . x
+$$
+
+$$
+I = \lambda u . u
+$$
+
+We have that $SK y \to_\beta I$
+
+*Exercise*: $\beta$-reduce $S (KS) S$
+
+This reduces to $\lambda z b c . z (b c)$, which is the $B$ combinator (composition).
+
+*Exercise* $\beta$-reduce $S (BBS) (KK)$.
