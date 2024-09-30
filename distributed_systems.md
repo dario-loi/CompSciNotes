@@ -207,3 +207,83 @@ VC(e) < VC(e^\prime) \iff \forall i \in \left\{ 1, 2, \ldots, n \right\} \quad V
 $$
 
 So we are back to the original definition of the happens before relation.
+
+## Third Lecture
+
+We now discuss some more advanced vector clock properties.
+
+### Vector Clock Properties
+
+#### Strong Clock Property
+
+Assume we have two events $e$ and $e^\prime$ . Then, we have that:
+
+$$
+e \to e^\prime \iff VC(e) \leq^\star VC(e^\prime)
+$$
+
+Where $\leq^star$ is a *partial order* relation, such as:
+
+$$
+\forall VC(e_i)[k] \leq VC(e_j)[k] \quad \land \quad \exists k^\prime VC(e_i)[k^\prime] < VC(e_j)[k^\prime]
+$$
+
+Meaning that all the elements of the vector clock of $e$ are less than or equal to the corresponding elements of the vector clock of $e^\prime$, and at least one element is strictly less, so that we have a *strict* partial order.
+
+#### Retrieving History Cardinality
+
+Given a vector clock $VC(e)$, we can retrieve the number of events that causally precede it by taking the sum of all the elements of the vector clock.
+
+$$
+| \Theta(e) | = \sum_{i=1}^n VC(e)[i]
+$$
+
+#### Retrieving Causality
+
+Given two events $e_i$ and $e_j$, we can check whether they are causally related by checking the vector clocks.
+
+$$e_i \to e_j \iff VC(e_i)[i] \leq VC(e_j)[i]$$
+
+#### Existance of a Causal Event
+
+We want to check whether
+
+$$
+\exists e_k : \lnot\left(e_k \to e_i\right) \land \left(e_k \to e_j\right)
+$$
+
+This is true if and only if:
+
+$$
+\exists k : VC(e_i)[k] < VC(e_j)[k]
+$$
+
+Meaning that there is a certain event that ticked the clock of $e_j$ but not the clock of $e_i$.
+
+### Snapshots
+
+Now we assume that the processes do *not* send notifications, rather, the monitoring process $p_0$ polls
+processes with a snapshot request.
+
+This was already discussed in the first lecture, and we know that what we retrieve cannot
+retrieve a consistent cut.
+
+We can change the protocol to improve this method. Now $p_0$ sends a snapshot request to all processes,
+however, when a process receives a snapshot request, it has to broadcast it to any other process.
+
+Only requests from $p_0$ are broadcasted, so that we do not flood the network with snapshot requests.
+
+When a process receives a snapshot request, it sends a snapshot of its local state to $p_0$.
+
+With this behavior, under the reasonable FIFO-channel assumption, we can reconstruct a consistent cut.
+
+#### Proof of Consistency
+
+Assume that we have $e_i$ and $e_j$ such that $e_i \to e_j$, and that $e_i$ is in the snapshot $C$,
+we want to prove that $e_j$ is also in the snapshot.
+
+By contradiction, assume that $e_i \not\in C$, then $p_i$ received the snapshot request before $e_i$,
+but then, since the channels are FIFO, and $e_j$ was spawned by a received message from $p_i$, then the broadcasted
+snapshot request sent to $p_j$ reached $p_j$ before $e_j$ was spawned, and therefore $e_j$ is also *not* in the snapshot.
+
+This protocol is known as the *Chandy-Lamport* protocol.    

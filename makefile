@@ -1,7 +1,7 @@
 
 
 MARKDOWN_FILES = $(wildcard *.md)
-PANDOC_FLAGS = --filter pandoc-plot --top-level-division=chapter --toc
+PANDOC_FLAGS = --filter pandoc-plot --top-level-division=chapter --toc -H format.tex
 
 
 all: pdf merge
