@@ -206,8 +206,26 @@ $$
 
 We have that $SK y \to_\beta I$
 
-*Exercise*: $\beta$-reduce $S (KS) S$
+*Exercise 1.1:* $\beta$-reduce $S (KS) S$
 
 This reduces to $\lambda z b c . z (b c)$, which is the $B$ combinator (composition).
 
-*Exercise* $\beta$-reduce $S (BBS) (KK)$.
+*Exercise 1.2:* $\beta$-reduce $S (BBS) (KK)$. 
+
+This reduces to $\lambda z c d . z d c$, which is the $C$ combinator (permutation).
+
+For exercise this, we show a step-by-step reduction:
+
+$$
+\begin{aligned}
+&S(BBS)(KK)\\
+\leadsto & \lambda z . (BBS) z ((KK) z)\\
+\leadsto & \lambda z . (\lambda c . B(Sc)) z ((KK) z)\\
+\leadsto & \lambda z . (\lambda c . B(Sc)) z K\\
+\leadsto & \lambda z . B(Sz) K\\
+\leadsto & \lambda z . (\lambda c . (Sz) (Kc)\\
+\leadsto & \lambda z c . Sz (Kc)\\
+\leadsto & \lambda z c d . zd (Kcd)\\
+\leadsto & \lambda z c d . zd c \quad \square.
+\end{aligned}
+$$
