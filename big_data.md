@@ -1,3 +1,10 @@
+---
+author: Dario Loi
+title: Computer Science Course Notes --- 1st Semester
+---
+
+
+
 # Big Data Computing
 
 ## First Lecture

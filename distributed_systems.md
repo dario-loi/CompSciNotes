@@ -1,3 +1,10 @@
+---
+author: Dario Loi
+title: Computer Science Course Notes --- 1st Semester
+---
+
+
+
 # Distributed Systems
 
 ## First Lecture
@@ -287,3 +294,38 @@ but then, since the channels are FIFO, and $e_j$ was spawned by a received messa
 snapshot request sent to $p_j$ reached $p_j$ before $e_j$ was spawned, and therefore $e_j$ is also *not* in the snapshot.
 
 This protocol is known as the *Chandy-Lamport* protocol.    
+
+## Fourth Lecture
+
+We want to design a protocol for *atomic commits*, this protocol should have the following properties:
+
+1. If processes reach a decision (commit/abort), it must be the same one.
+2. A process cannot reverse its decision after reaching it.
+3. The commit decision can be reached only if all processes vote *Yes*.
+4. If *there are no failures*, and all processes vote *Yes*, then the commit decision is reached.
+
+Naturally, this could be satisfied by a *trivial* protocol, such as one that *always* aborts, or one that *always* commits. 
+These protocols are not useful since they are not *safe*.
+
+### Generic Properties of Distributed Systems
+
+Usually, there are two sets in which properties can be divided:
+
+1. *Safety* properties, which basically ask ``*if* something happens, it does not go *wrong*''.
+2. *Liveness* properties, which basically ask ``*if* time goes on, *something* will happen''.
+
+You can trivially satisfy safety by doing nothing, you can trivially satisfy liveness by doing anything.
+
+You *want* a tradeoff, such that you get as much liveness as possible while preserving safety.
+
+### Coordination Protocols
+
+We assume the existance of *two* different processes, *coordinators* and *participants*.
+
+We simulate the execution of a simple protocol:
+
+1. The coordinator sends a vote request to all participants.
+2. The participants decide Yes/No and send the vote to the coordinator. If a participant votes *No*, then the coordinator must abort.
+3. The coordinator receives all votes, if all votes are *Yes*, then the coordinator commits, otherwise it aborts.
+4. The coordinator sends the decision to all participants.
+5. The participants apply the decision.

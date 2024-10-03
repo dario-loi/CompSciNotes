@@ -1,3 +1,9 @@
+---
+author: Dario Loi
+title: Computer Science Course Notes --- 1st Semester
+---
+
+
 # Advanced Machine Learning
 
 ## First Lecture

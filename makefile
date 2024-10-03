@@ -9,6 +9,7 @@ all: pdf merge
 ## Convert all markdown files to pdf
 pdf: $(MARKDOWN_FILES:.md=.pdf)
 
+
 %.pdf: %.md
 	@echo "Converting $< to $@"
 	@pandoc $(PANDOC_FLAGS)  $< -o $@
@@ -23,4 +24,3 @@ clean:
 	@rm -f *.pdf
 
 .PHONY: clean
-
