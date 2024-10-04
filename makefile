@@ -1,7 +1,7 @@
 
 
 MARKDOWN_FILES = $(wildcard *.md)
-PANDOC_FLAGS = --top-level-division=chapter --toc -H format.tex
+PANDOC_FLAGS = --top-level-division=chapter --toc -H format.tex -V colorlinks=true -V linkcolor=blue -V urlcolor=red
 
 
 all: pdf merge

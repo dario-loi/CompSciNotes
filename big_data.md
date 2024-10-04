@@ -246,3 +246,173 @@ A variation of the Ring AllReduce is the Bandwidth-optimal recursive doubling, t
 #### Latency-optimal recursive doubling
 
 Using the same binary-tree like topology as the Bandwidth-optimal recursive doubling, we can build a latency-optimal recursive doubling, which is optimal in terms of latency, by sending the entire gradient vector in a single step.
+
+## Fourth Lecture
+
+This lecture went into a general overview of the CUDA GPGPU programming model.
+
+An NVidia GPU is essentially a collection of *streaming multi-processors* (SMs), each of which is a collection of 
+individual *threads*, these threads are grouped into *warps*, which are the smallest unit of execution on the GPU.
+
+Warps are made up of 32 threads, and they are executed in *SIMD* (Single Instruction, Multiple Data) fashion, which means that all threads in a warp execute the same instruction at the same time.
+
+## Fifth Lecture
+
+Today we will finish up the contents of the fourth lecture.
+
+We started discussing on how GPUs are better for big data workloads. The main reason
+is that their specialization allows for better efficiency in throughput-oriented workloads.
+
+The concept of *warps* was introduced, as well as the notion that control flow is incredibly
+disruptive to kernel throughput, as it can cause *divergence* in the warps.
+
+### GPU Interconnection
+
+As mentioned before in the Deep Learning case study lecture, these GPUs are connected in a messy,
+non-uniform way, which can cause bottlenecks in the communication between the GPUs.
+
+### Tensor Processing Units
+
+GPU hardware is still *too* general for workloads which only need linear algebra operations, such as
+fully connected layers in a neural network. They suffer from the [Von Neumann Bottleneck](https://en.wikipedia.org/wiki/Von_Neumann_architecture#Von_Neumann_bottleneck),
+meaning that most of the cases, the processing units are waiting for data to be fetched from memory.
+
+Accessing memory is impactful not only in terms of latency, but also in terms of power consumption, as
+a memory access can cost as much as 650x the cost of a FLop.
+
+This is why Google developed the [TPU](https://en.wikipedia.org/wiki/Tensor_processing_unit), a specialized hardware accelerator, largely based on the concept of a systolic array, which is a type of parallel computing architecture.
+
+A TPU is a collection of Tensor Cores, each posses a set of Matrix Multiplication Units(MXUs), Scalar Units, and high-bandwidth local memory.
+
+MXUs are *not* designed according to the Von Neumann architecture, they are often termed as a spatial/dataflow architecture.
+
+### Dataflow Architecture
+
+A dataflow architecture is composed by arranging simple circuits that perform elementary arithmetic in a 2D-grid, the grid possesses no memory, and the data *flows* through the grid, hence the name.
+
+### Matrix Multiplication
+
+We give a recap of matrix multiplication, basically:
+
+$$
+\underbrace{\begin{bmatrix}A & B\\  C & D \\ E & F\end{bmatrix}}_M \times \underbrace{\begin{bmatrix}G \\ H\end{bmatrix}}_U = \underbrace{\begin{bmatrix}AG + BH \\ CG + DH \\ EG + FH\end{bmatrix}}_V
+$$
+
+Where each letter can be seen as an individual *tile* of the matrix.
+
+We observe how, for example, the $G$ tile is multiplied by the first column of $M$ to result in the first column of $U$, same for the $H$ tile. in fact, each row of the $V$ vector is the result of the multiplication of the respective $M$ row by the column of $U$.
+
+Therefore, we can *flow* the data through the systolic array, and perform a final aggregation of the results to obtain the final result.
+
+This can be done *without* the need for registers or memory, as the computation is done on the fly at each clock cycle.
+
+### TPU Interconnections
+
+Interconnecting TPUs is usually done through a 3D torus network, which is a simple and efficient way to connect the TPUs.
+
+### Performance Claims
+
+Google claims that TPUs are in general faster than the comparable NVidia GPU solutions, however, other studies have shown that this is not always the case, and that the performance of the TPU is highly dependent on the workload.
+
+In general it is still ambiguous whether TPUs are a better solution than GPUs, and it is still an open research question. The point of the lecture is more to convey the concept of the dataflow architecture, rather than its performance (which may change in the future).
+
+### Neuromorphic Computing
+
+Another recent attempt at supplanting the Von Neumann architecture is the concept of Neuromorphic Computing, which is a type of computing that is inspired by the human brain.
+
+Spike trains are introduced as an input, and the synthetic neural network prodcues a spike train as an output, this is done by using a network of *spiking neurons*. In theory, since this replicates the structure of the brain, it should also be capable of possessing memory capabilities.
+
+### Network Topology Design
+
+We now move on to talk about ways to design interconnection between nodes of a big data computing system.
+
+GPUs are connected by *switches*, which act as crossroads for the data. These can connect at most $r$ numbers of nodes, this is called the switch's *radix*.
+
+Topologies are *regular* if they are a regular graph (rings), *irregular* otherwise.
+
+*Hop count* is the number of switches that a message must pass through to reach its destination.
+
+The maximum hop count attainable in a network is the *diameter* of the network.
+
+A network is *blocking* if two nodes cannot be connected by two disjoint paths. If there is this possibility, the network is *non-blocking*.
+
+A network is *direct* if for all the switches, there is at least a connected *node*, if they are *indirect*, there may be some switches that are only connected to other switches.
+
+### Bisection Cut
+
+In order to obtain a measure of a network's efficiency, we can perform a *bisection cut* analysis. This is done by cutting the network across the smalles possible cut that divides the nodes into *nearly* equal parts.
+
+The *bisection bandwidth* is the bandwidth of the smallest cut that divides the network into two equal parts.
+
+This is calulated as:
+
+$$
+\text{Bisection Bandwidth} \coloneqq \text{Number of Cuts} \cdot \text{Cut Links Bandwidth}
+$$
+It is simply the multiplication between the number of cut links, and the bandwidth across the cut.
+
+We produce a table for these metrics on different topologies:
+
+| Topology  | Diameter        | Bisection Cut           | 
+|-----------|-----------------|-------------------------|
+| Chain     | $N$             | $1$                     |
+| Ring      | $N/2$           | $2$                     |
+| Mesh      | $2(\sqrt{N}-1)$ | $\sqrt{N}$              |
+| Torus     | $\sqrt{N}$      | $2\sqrt{N}$             |
+| Trees     | $1$             | $2 \cdot \log_{r-1}(N)$ |
+
+### Trees
+
+Trees are a classical computer science structure that usually gives some form of logarithmic improvement over a metric when implemented as a data structure. Here we can lower the bisection cut cardinality to a logarithmic funciton of the number of nodes, which is a significant improvement over the other topologies.
+
+However, we are clearly bottlenecking the system when we have to pass through the root of the tree, as the root is a single point of failure. The same reasoning applies inductively where lower nodes are responsible for the inter-communication of all the children.
+
+#### Fat Trees
+
+We can solve this through a *fat tree*, a data structure where at each higher level we have a double number of links than the previous level, this allows the higher nodes to account for the increased responsibility of the lower nodes.
+
+Fat trees metrics:
+
+- $r$ bottom level switch radix
+- $n$ number of servers/nodes
+- Diameter: $2 log_{r/2}(n)$
+- Bisection cut: $n/2$
+
+A fat tree is a *non-blocking* network by construction, since we explicitly add a number of links that is double the number of the previous level.
+
+
+In practice, we want to use switches that have the same radix level at each layer. This means that we need to aggregate multiple switches in a mesh network to form a single *virtual* switch node.
+
+This is usually called a ``folded CLOS network''.
+
+#### Blocking Fat Trees
+
+We can save some money by using a *blocking* fat tree, where we use a radix $r$ at the bottom level, and a radix $r/2$ at the upper level. This is a blocking network, but it is still a good solution for most cases.
+
+The ratio between the lower and upper radix is known as the *blocking ratio*, for our example it's a 2:1 ratio.
+
+### Dragonfly
+
+Another popular state-of-the-art topology is the *Dragonfly* network, which is a network that is composed of a number of *groups*, each group is a *clique* (a fully connected graph), and each group is connected to a number of other groups.
+
+This allows for extremely low hop counts, and high bisection bandwidth.
+
+For a fixed radix $r$, dragonfly networks can connect much more nodes than a fat tree.
+Diameters are also kept smaller. Naturally, this means that with similar requirements, the network will be cheaper to build.
+
+Disadvantages include the lack of a guarantee of full bandwidth (blocking), expansion is more difficult, as is load balancing. A dragonfly topology also produces more loops, and therefore deadlocks.
+
+### Dragonfly+
+
+Dragonfly+ is a slight variation where you have a fully connected *core* that connects roots of various trees that live at the edge of the network. The trees on the edge can be fat trees, or blocking fat trees with various out-degrees.
+
+### Hamming Meshes
+
+Hamming meshes are a type of architecture specific to deep learning workloads (where we employ three-dimensional parallelism). Here we wish to have:
+
+1. A cheap architecture, such as a toroidal network
+2. To still preserve some measure of speed for communications across the network
+
+We solve this by essentially first producing a toroidal mesh, and then by interconnecting the edges (unwrapping the cylinder into a rectangle over an arbitrary cut) with fat trees.
+
+In this way we create some sort of *information highway* that allows us to perform eventual edge-to-edge communications in a logarithmic number of hops.

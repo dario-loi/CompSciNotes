@@ -318,14 +318,42 @@ You can trivially satisfy safety by doing nothing, you can trivially satisfy liv
 
 You *want* a tradeoff, such that you get as much liveness as possible while preserving safety.
 
-### Coordination Protocols
 
-We assume the existance of *two* different processes, *coordinators* and *participants*.
+### Two-Phase Commit
 
-We simulate the execution of a simple protocol:
 
-1. The coordinator sends a vote request to all participants.
+We assume the existance of *two* different processes, *coordinators* and *participants*, we describe the protocol as follows:
+
+1. The coordinator sends a *Prepare* message to all participants.
 2. The participants decide Yes/No and send the vote to the coordinator. If a participant votes *No*, then the coordinator must abort.
-3. The coordinator receives all votes, if all votes are *Yes*, then the coordinator commits, otherwise it aborts.
-4. The coordinator sends the decision to all participants.
-5. The participants apply the decision.
+3. The coordinator receives all votes, if all votes are *Yes*, then the coordinator sends a *Commit* message to all participants, otherwise it sends an *Abort* message.
+4. The participants apply the decision.
+
+If the coordinator fails, then the participants will communicate with each other to reach a decision.
+
+If a vote fails to reach the coordinator after a certain timeout period, it will be assumed to be a *No* vote. This
+preserves the safety property.
+
+This protocol satisfies the properties of atomic commits, and is known as the *Two-Phase Commit* protocol. This is
+*not* a *live* protocol, since it can deadlock/timeout.
+
+### Logs
+
+Logs are a sequence of events that are written to a file, and are used to recover the state of a system in case of failure.
+We assume the records to be consistent, so that system failures do not corrupt the log. This means that the log is written
+to a stable storage, such as a disk.
+
+Logs allow a system to be fault-tolerance since they can be used to recover the state of the system in case of failure.
+
+You can have *two* types of behavior when logging, depending on the order of the operations:
+
+- Log and then act
+- Act and then log
+
+In both cases, you might *die* in the middle of the operation, and you might have to recover the state of the system. Both systems are
+recoverable as a coordinator, but you *must* act in a consistent way to recover the state of the system.
+
+As a participant, recoverability is *not* guaranteed if you act before you log, The best way to ensure recoverability is to log before you act,
+so that you can be sure about if you voted *Yes* or *No* before you die.
+
+If you vote was *No*, then you can *always* abort, if your vote was *Yes*, then you can re-send the vote to the coordinator, and await the decision.

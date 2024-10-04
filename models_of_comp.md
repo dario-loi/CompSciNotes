@@ -234,3 +234,34 @@ $$
 \leadsto & \lambda z c d . zd c \quad \square.
 \end{aligned}
 $$
+
+## Third Lecture
+
+    Recupera!!!
+
+## Fourth Lecture
+
+First we do a simple exercise, $\beta$-reduce $\lambda u v. ( \lambda z . z z) (\lambda t . t u v).$ 
+
+$$
+\begin{aligned}
+&\lambda u v. ( \lambda z . z z) (\lambda t . t u v)\\
+\rightarrow_\beta & \lambda u v. (\lambda t . t u v) (\lambda t . t u v)\\
+\rightarrow_\beta & (\lambda t . t u v) (\lambda t . t u v)\\
+\rightarrow_\beta & \lambda u v . (\lambda t. t u v) u v\\
+\rightarrow_\beta & \lambda u v . u u v v \quad \square.
+\end{aligned}
+$$
+
+Find a term $X$ s.t $Xx = \lambda t . t ( X x)$
+
+$$
+\begin{aligned}
+&X x = \lambda t . t (X x)\\
+&X = (\lambda f x y . t (f x)) X\\
+&X = Y (\lambda f x y . t (f x))\\
+\end{aligned}
+$$
+
+Find a term $H$ s.t $H (\lambda x_1 x_2 x_3.P) = \lambda a x_3 x_2 x_1 . a x_1 x_2 x_3$
+
