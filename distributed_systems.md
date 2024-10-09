@@ -357,3 +357,66 @@ As a participant, recoverability is *not* guaranteed if you act before you log, 
 so that you can be sure about if you voted *Yes* or *No* before you die.
 
 If you vote was *No*, then you can *always* abort, if your vote was *Yes*, then you can re-send the vote to the coordinator, and await the decision.
+
+## Fifth Lecture
+
+### Paxos
+
+The previous lecture was a specific case of a more general problem, that of *consensus*.
+
+In the consensus problem, we have a set of processes that must agree on a certain value, and we want to ensure that the value is agreed upon by all processes.
+
+#### Informal Description
+
+Paxos is an asynchronous protocol that solve the consensus problem. It has been developed by Leslie Lamport, and is used in many distributed systems.
+
+Paxos is *more* live than the Two-Phase Commit protocol, since it can recover from failures and timeouts.
+
+Paxos is in essence a *replication system*, meaning that you want to replicate values across multiple processes (that are
+potentially distributed across multiple machines) in a fault-tolerant way.
+
+Paxos is capable of obtaining consensus on a *single value*, obtaining consensus across a *sequence* requires
+running *multiple instances* of the protocol.
+
+By *faults* we are referring to *crashes*, that is, the possibility that a process might stop working.
+Processes could eventually recover, but there is no way to know and no way to guarantee that they will.
+
+#### Structure of the Problem
+
+We first start by defining different classes of processes that participate in the protocol:
+
+1. *Acceptors*: Their role is to vote on whether a value is accepted or not.
+2. *Proposers*: Their role is to propose a value to be accepted. 
+3. *Learners*: Their role is to learn the value that has been accepted.
+
+The idea is that if I get enough votes from the acceptors, then I can be sure that the value is accepted.
+
+The definition of *enough* is flexible, and can be defined by the system designer. Naturally,
+requiring more votes leads to more fault-tolerance, but also less liveliness.
+
+Asking for *all* the acceptors to vote coherently essentially degrates the protocol to a Two-Phase Commit protocol.
+
+The threshold chosen is called a *Quorum* (akin to parliamentary democracy). 
+
+We also have the notion of a *Round*, which are statically associated to proposers by some rule. A round
+must be started whenever a proposer wants to propose a value.
+
+A simple rule for round selection is, given $n$ proposers, the proposer $i$ always starts rounds $k \cdot n + i$.
+They also have to start the smallest round that is greater than the round of the last proposal that they have seen.
+
+#### Phases of the protocol
+
+
+1. A proposer sends a `prepare(r)` message to all acceptors, proposing a value relative to round `r`, here we do not need to send the value but merely receive some promises that the acceptors will vote for us on this round.
+2. Acceptors then respond with `promise(r, last_round, last_value)`, where `last_round` is the round of the last proposal that the acceptor has seen, and `last_value` is the value of the last proposal that the acceptor has seen. For the first proposal, `last_round` is set to $-\infty$ or some other sentinel value.
+3. An `accept(r, value)` message is sent to all acceptors, where `value` is the value that the proposer wants to propose.
+4. Learners receive an `accepted(r, value)` message, and learn the value.
+
+#### How to choose a value
+
+A proposer follows the following rules to choose a value:
+
+1. Take the `promise` message with the highest `last_round` value.
+2. The value is the `last_value` of the `promise` message with the highest `last_round` value.
+3. If no `promise` messages were received by any acceptor in my quorum, then I can propose any value that I want.
+
