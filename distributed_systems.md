@@ -419,4 +419,3 @@ A proposer follows the following rules to choose a value:
 1. Take the `promise` message with the highest `last_round` value.
 2. The value is the `last_value` of the `promise` message with the highest `last_round` value.
 3. If no `promise` messages were received by any acceptor in my quorum, then I can propose any value that I want.
-
