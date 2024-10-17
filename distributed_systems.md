@@ -419,3 +419,59 @@ A proposer follows the following rules to choose a value:
 1. Take the `promise` message with the highest `last_round` value.
 2. The value is the `last_value` of the `promise` message with the highest `last_round` value.
 3. If no `promise` messages were received by any acceptor in my quorum, then I can propose any value that I want.
+
+## Sixth Lecture
+
+Today we give another proof of the Paxos protocol, in a more formal way.    
+
+Theorem:
+
+> If acceptor $a$ votes for $x$ in round $i$, then no value $x^\prime \neq x$ can be chosen in previous rounds
+
+Proof:
+
+> By induction, assume $i = 0$, the theorem is trivially true, since there is no previous
+> round. Assume now that we are in round $i > 0$ and that the theorem holds $\forall k < i$.
+> 
+> We now have a set of acceptors $A$ and a Quorum set $Q \subseteq A$. With |Q| > |A|/2.
+> Given that the last votes for any acceptor in $Q$ was on a round $j$, we can asuume that from $j+1$ to $i-1$ the acceptors in $Q$ did *not* vote (otherwise we would have a contradiction). The only guys that could have voted are in the set $A \setminus Q$, but since $|Q| > |A|/2$, then $|A \setminus Q| < |A|/2$, and therefore we cannot have a quorum of votes for any value $x^\prime \neq x$.
+>
+> Assume now that $j$ is *not* -1 (meaning that the acceptors in $Q$ *never voted*), for the case in which $j = -1$ the theorem holds by induction.
+>
+> We now prove for the case in which $j \geq 1$. In this case, in round $j$, at *least* one member of the quorum voted for $x$. Since it is impossible that two proposers propose two different values, and a proposer *cannot* send two different values in the same round, then *no other value* different from $x$ can be chosen in round $j$.
+
+### Paxos Coordinator
+
+We now discuss the role of a *coordinator* in the Paxos protocol. The coordinator is a process that is responsible for starting the protocol, and for ensuring that the protocol is run correctly.
+
+Leader election is as *hard* as consensus, but once a leader is elected, consensus can be made easier. It is often a good idea to *try* to elect a leader, but not to *depend* on the leader.
+
+Electing a leader for Paxos at least ensures that, if the leader selection fails and we have, for example, two leaders, we can at least be sure that consensus will be safe.
+
+Given an *oracle* that can solve the election problem, Paxos becomes a *live* protocol.
+
+## Eight Lecture
+
+If we have an asynchronous system, even only *one* crash leads to the impossibility of reaching consensus.
+
+Many other problems can be reduced to the consensus problem, such as leader election (which we saw in the previous lectures).
+
+We recap some properties of consensus protocols:
+* Agreement: All non-faulty processes decide the same value.
+* Validity: If someone decides a value, then it must have been proposed by someone.
+* Termination: All non-faulty processes eventually decide.
+
+We do not care about computational complexity.
+
+In consensus each process first chooses a value, then tries to reach agreement on the value.
+
+Assume that I have a consensus problem over a binary set of values $\left\{ 0, 1 \right\}$, and that I have a set of processes $\left\{ p_1, p_2, \ldots, p_n \right\}$.
+
+We have a 0-valent state, in which all processes vote 0, and a 1-valent state, in which all processes vote 1. Here consensus is trivially reached by agreement and validity.
+
+Now we list each possible $2^n$ states of the systems in a truth-table manner, but we use a code in which only one bit is changed at a time (such as Gray code).
+
+We then must have two configurations that are *adjacent* in the table, and that are *not* in the same valent state (one is 0-valent, the other is 1-valent).
+Then, naturally, there must be a single bit that *discriminates* inbetween these two states. It follows that a single crash can invalidate the protocol.
+
+This proves that *any* FLP protocol is impossible even only with *one* crash.

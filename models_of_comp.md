@@ -21,6 +21,9 @@ Prof email: piperno@di.uniroma1.it
 
 The course content will focus on **functional programming** and $\lambda$-calculus.
 
+The course contains practical exercises that should be done by pen and paper, so do not
+rely on *just* these notes.
+
 The main application of these languages is that of *function application*, these languages
 are devoid of *assignment* semantics, and are therefore called *pure*.
 
@@ -265,3 +268,30 @@ $$
 
 Find a term $H$ s.t $H (\lambda x_1 x_2 x_3.P) = \lambda a x_3 x_2 x_1 . a x_1 x_2 x_3$
 
+## Fifth Lecture
+
+Today we will try to be more precise about the *fixed point* operator.
+
+The first question is:
+
+Find $X$ s.t:
+
+$$
+XMN = MI(MN) \quad \forall M, N \in \Lambda
+$$
+
+By substitution, we have:
+
+$$
+X = \lambda x y . x I (x y)
+$$
+
+This can be verified by beta reduction (we skip it since it's trivial).
+
+Now, the core question is to replicate the same result with an expression that is *recursive* in nature.
+
+For example: find $X \in Lambda$ s.t:
+
+$$
+XMN = M(XMN) \quad \forall M, N \in \Lambda
+$$
