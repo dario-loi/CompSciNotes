@@ -206,13 +206,13 @@ We can use smart reduction techniques common in IPC (Inter-Process Communication
 
 We keep a table of operations and total volume of communication:
 
-| Operation | Volume | Steps
-|-----------|--------|-----|
-| Ideal       | $n$    | 1   |
-| Parameter Server | $max(n, \dfrac{pn}{k})$ | 1 |
-| Näive AllReduce | $(p-1)\cdot n$ | 1 |
-| Ring AllReduce | $2\cdot N$ | $2 (p-1)$ |
-| Bandwidth-optimal recursive doubling | $2\cdot N$ | $2\log_2(p)$ |
+| Operation                            | Volume                  | Steps        |
+| ------------------------------------ | ----------------------- | ------------ |
+| Ideal                                | $n$                     | 1            |
+| Parameter Server                     | $max(n, \dfrac{pn}{k})$ | 1            |
+| Näive AllReduce                      | $(p-1)\cdot n$          | 1            |
+| Ring AllReduce                       | $2\cdot N$              | $2 (p-1)$    |
+| Bandwidth-optimal recursive doubling | $2\cdot N$              | $2\log_2(p)$ |
 
 We explain each:
 
@@ -353,13 +353,13 @@ It is simply the multiplication between the number of cut links, and the bandwid
 
 We produce a table for these metrics on different topologies:
 
-| Topology  | Diameter        | Bisection Cut           | 
-|-----------|-----------------|-------------------------|
-| Chain     | $N$             | $1$                     |
-| Ring      | $N/2$           | $2$                     |
-| Mesh      | $2(\sqrt{N}-1)$ | $\sqrt{N}$              |
-| Torus     | $\sqrt{N}$      | $2\sqrt{N}$             |
-| Trees     | $1$             | $2 \cdot \log_{r-1}(N)$ |
+| Topology | Diameter        | Bisection Cut           |
+| -------- | --------------- | ----------------------- |
+| Chain    | $N$             | $1$                     |
+| Ring     | $N/2$           | $2$                     |
+| Mesh     | $2(\sqrt{N}-1)$ | $\sqrt{N}$              |
+| Torus    | $\sqrt{N}$      | $2\sqrt{N}$             |
+| Trees    | $1$             | $2 \cdot \log_{r-1}(N)$ |
 
 ### Trees
 

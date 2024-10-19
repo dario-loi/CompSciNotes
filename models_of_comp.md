@@ -263,5 +263,22 @@ $$
 \end{aligned}
 $$
 
-Find a term $H$ s.t $H (\lambda x_1 x_2 x_3.P) = \lambda a x_3 x_2 x_1 . a x_1 x_2 x_3$
+Find a term $H$ s.t $H (\lambda x_1 x_2 x_3.P) = \lambda x_3 x_2 x_1 . P$
+
+This corresponds to performing a function call with the arguments in reverse order:
+
+$$
+H \coloneqq \lambda f x_3 x_2 x_1 . f x_1 x_2 x_3
+$$
+
+You can see by beta reduction that this is the correct term:
+
+$$
+\begin{aligned}
+&H (\lambda x_1 x_2 x_3 . P)\\
+\rightarrow_\beta & (\lambda f x_3 x_2 x_1 . f x_1 x_2 x_3) (\lambda x_1 x_2 x_3 . P)\\
+\rightarrow_\beta & (\lambda x_3 x_2 x_1 . (\lambda x_1 x_2 x_3 . P) x_1 x_2 x_3)\\
+\rightarrow_\beta & \lambda x_3 x_2 x_1 . P \quad \square.
+\end{aligned}
+$$
 
