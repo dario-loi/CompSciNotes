@@ -21,6 +21,9 @@ Prof email: piperno@di.uniroma1.it
 
 The course content will focus on **functional programming** and $\lambda$-calculus.
 
+The course contains practical exercises that should be done by pen and paper, so do not
+rely on *just* these notes.
+
 The main application of these languages is that of *function application*, these languages
 are devoid of *assignment* semantics, and are therefore called *pure*.
 
@@ -134,9 +137,9 @@ Bound variables can be renamed, whereas for free variables the naming is relevan
 
 $$
 \begin{cases}
-FV(x) = \left\{x\right\}\\
-FV(MN) = FV(M) \cup FV(N)\\
-FV(\lambda x . M) = FV(M) - \left\{ x \right\}
+FV(x) &= \left\{x\right\}\\
+FV(MN) &= FV(M) \cup FV(N)\\
+FV(\lambda x . M) &= FV(M) - \left\{ x \right\}
 \end{cases}
 $$
 
@@ -282,3 +285,162 @@ $$
 \end{aligned}
 $$
 
+## Fifth Lecture
+
+Today we will try to be more precise about the *fixed point* operator.
+
+The first question is:
+
+Find $X$ s.t:
+
+$$
+XMN = MI(MN) \quad \forall M, N \in \Lambda
+$$
+
+By substitution, we have:
+
+$$
+X = \lambda x y . x I (x y)
+$$
+
+This can be verified by beta reduction (we skip it since it's trivial).
+
+Now, the core question is to replicate the same result with an expression that is *recursive* in nature.
+
+For example: find $X \in Lambda$ s.t:
+
+$$
+XMN = M(XMN) \quad \forall M, N \in \Lambda
+$$
+
+## Sixth Lecture
+
+This lecture will focus on *Combinatory Logic*, which is a simpler version of lambda calculus, where we only use combinators.
+
+Here we have:
+* Application
+* Variables
+* *No* Abstraction
+
+This means that *all* variables are *free!*.
+
+We have some *constants* (we define them using abstraction with a slight abuse of notation):
+* $S = \lambda x y z . x z (y z)$
+* $K = \lambda x y . x$
+* $I = \lambda x . x$
+* $B = \lambda x y z . x (y z)$
+* $C = \lambda x y z . x z y$
+
+(Where $SK$ is a sufficient base for all combinators, and the other combinators are syntactic sugar).
+
+We define the $CL$ set inductively, as follows:
+
+$$
+\frac{x \in V}{x \in CL} \quad \text{(var)}
+$$
+
+$$
+\frac{X \in const}{X \in CL} \quad \text{(const)}
+$$
+
+$$
+\frac{X \in CL \quad Y \in CL}{(X Y) \in CL} \quad \text{(app)}
+$$
+
+In the same way as lambda calculus, we use left-associative application.
+
+$$
+((UV)W) = UVW \neq U(VW)
+$$
+
+Our constants have *computational behavior*, as explained by the abstraction rules. We can give explicit definitions for constant computations in order to completely remove the abstraction rules.
+
+* $SXYZ \triangleright XZ(YZ)$
+* $KXY \triangleright X$
+* $IX \triangleright X$
+* $BXYZ \triangleright X(YZ)$
+* $CXYZ \triangleright XZY$
+
+Showing that these combinators map to lambda terms is trivial (we can just apply the definitions). Showing the opposite is a bit more complex, but it can be done.
+
+We essentially want to *implement* the abstraction behavior from combinatory logic, so that we can transpose *any* lambda term (not just trivial combinators) into combinatory logic.
+
+$$
+\lambda x . P \quad [x] P \quad \text{(abstraction of } x \text{ in } P)
+$$
+
+
+For instance
+
+$$
+\lambda x y . y x \quad [x]([y]yx)
+$$
+
+### Transformation Algorithm
+
+Our aim is to produce an algorithm that performs this transformation:
+
+$$
+([x] P) x \to P
+$$
+
+We do this by creating a set of rules that we then apply iteratively (effectively performing a closure of the initial expression over the transformation set).
+
+We define indicators $U, V$ s.t:
+
+$$
+\begin{cases}
+U &\quad x \not\in FV(U)\\
+W, V &\quad x \in FV(V)
+\end{cases}
+$$
+
+Then we define the following rules:
+
+$$
+\begin{aligned}
+\rm I. &\quad [x] U x = U\\
+\rm II. &\quad [x] x = I\\
+\rm III. &\quad [x] U = KU\\
+\rm IV. &\quad [x] (UW) = BU([x]W)\\
+\rm V. &\quad [x] [VU] = C([x]V)U\\
+\rm VI. &\quad [x] (VW) = S([x]V)([x]W)
+\end{aligned}
+$$
+
+The order of the rules is *important*. This kind of algorithm is called a *markov algorithm*, which is a class of algorithms in which a set of rules is applied iteratively, with a priority order, until a fixed point is reached.
+
+### Example of application
+
+Let's give an example of application by transforming
+
+$$
+\lambda x y . y t x
+$$
+
+We start by applying the rules:
+
+$$
+\begin{aligned}
+\lambda x y &. y t x\\
+&[x]([y](yt)x)\\
+&[x](C([y]yt)x)\\
+&[x](C(C([y]y)t)x)\\
+&[x](C(C(I)t)x)\\
+&[x]C(CIt)x\\
+&C(CIt)x\\
+\end{aligned}
+$$
+
+Now we can apply this combinatory logic expression to $xy$:
+
+$$
+\begin{aligned}
+C(CIt)x y &\triangleright C(CIt)y x\\
+&\triangleright CIt y x\\
+&\triangleright I y t x \\
+&\triangleright y t x \quad \square.
+\end{aligned}
+$$
+
+In order to show that our result is

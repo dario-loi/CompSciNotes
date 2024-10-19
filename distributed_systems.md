@@ -357,3 +357,121 @@ As a participant, recoverability is *not* guaranteed if you act before you log, 
 so that you can be sure about if you voted *Yes* or *No* before you die.
 
 If you vote was *No*, then you can *always* abort, if your vote was *Yes*, then you can re-send the vote to the coordinator, and await the decision.
+
+## Fifth Lecture
+
+### Paxos
+
+The previous lecture was a specific case of a more general problem, that of *consensus*.
+
+In the consensus problem, we have a set of processes that must agree on a certain value, and we want to ensure that the value is agreed upon by all processes.
+
+#### Informal Description
+
+Paxos is an asynchronous protocol that solve the consensus problem. It has been developed by Leslie Lamport, and is used in many distributed systems.
+
+Paxos is *more* live than the Two-Phase Commit protocol, since it can recover from failures and timeouts.
+
+Paxos is in essence a *replication system*, meaning that you want to replicate values across multiple processes (that are
+potentially distributed across multiple machines) in a fault-tolerant way.
+
+Paxos is capable of obtaining consensus on a *single value*, obtaining consensus across a *sequence* requires
+running *multiple instances* of the protocol.
+
+By *faults* we are referring to *crashes*, that is, the possibility that a process might stop working.
+Processes could eventually recover, but there is no way to know and no way to guarantee that they will.
+
+#### Structure of the Problem
+
+We first start by defining different classes of processes that participate in the protocol:
+
+1. *Acceptors*: Their role is to vote on whether a value is accepted or not.
+2. *Proposers*: Their role is to propose a value to be accepted. 
+3. *Learners*: Their role is to learn the value that has been accepted.
+
+The idea is that if I get enough votes from the acceptors, then I can be sure that the value is accepted.
+
+The definition of *enough* is flexible, and can be defined by the system designer. Naturally,
+requiring more votes leads to more fault-tolerance, but also less liveliness.
+
+Asking for *all* the acceptors to vote coherently essentially degrates the protocol to a Two-Phase Commit protocol.
+
+The threshold chosen is called a *Quorum* (akin to parliamentary democracy). 
+
+We also have the notion of a *Round*, which are statically associated to proposers by some rule. A round
+must be started whenever a proposer wants to propose a value.
+
+A simple rule for round selection is, given $n$ proposers, the proposer $i$ always starts rounds $k \cdot n + i$.
+They also have to start the smallest round that is greater than the round of the last proposal that they have seen.
+
+#### Phases of the protocol
+
+
+1. A proposer sends a `prepare(r)` message to all acceptors, proposing a value relative to round `r`, here we do not need to send the value but merely receive some promises that the acceptors will vote for us on this round.
+2. Acceptors then respond with `promise(r, last_round, last_value)`, where `last_round` is the round of the last proposal that the acceptor has seen, and `last_value` is the value of the last proposal that the acceptor has seen. For the first proposal, `last_round` is set to $-\infty$ or some other sentinel value.
+3. An `accept(r, value)` message is sent to all acceptors, where `value` is the value that the proposer wants to propose.
+4. Learners receive an `accepted(r, value)` message, and learn the value.
+
+#### How to choose a value
+
+A proposer follows the following rules to choose a value:
+
+1. Take the `promise` message with the highest `last_round` value.
+2. The value is the `last_value` of the `promise` message with the highest `last_round` value.
+3. If no `promise` messages were received by any acceptor in my quorum, then I can propose any value that I want.
+
+## Sixth Lecture
+
+Today we give another proof of the Paxos protocol, in a more formal way.    
+
+Theorem:
+
+> If acceptor $a$ votes for $x$ in round $i$, then no value $x^\prime \neq x$ can be chosen in previous rounds
+
+Proof:
+
+> By induction, assume $i = 0$, the theorem is trivially true, since there is no previous
+> round. Assume now that we are in round $i > 0$ and that the theorem holds $\forall k < i$.
+> 
+> We now have a set of acceptors $A$ and a Quorum set $Q \subseteq A$. With |Q| > |A|/2.
+> Given that the last votes for any acceptor in $Q$ was on a round $j$, we can asuume that from $j+1$ to $i-1$ the acceptors in $Q$ did *not* vote (otherwise we would have a contradiction). The only guys that could have voted are in the set $A \setminus Q$, but since $|Q| > |A|/2$, then $|A \setminus Q| < |A|/2$, and therefore we cannot have a quorum of votes for any value $x^\prime \neq x$.
+>
+> Assume now that $j$ is *not* -1 (meaning that the acceptors in $Q$ *never voted*), for the case in which $j = -1$ the theorem holds by induction.
+>
+> We now prove for the case in which $j \geq 1$. In this case, in round $j$, at *least* one member of the quorum voted for $x$. Since it is impossible that two proposers propose two different values, and a proposer *cannot* send two different values in the same round, then *no other value* different from $x$ can be chosen in round $j$.
+
+### Paxos Coordinator
+
+We now discuss the role of a *coordinator* in the Paxos protocol. The coordinator is a process that is responsible for starting the protocol, and for ensuring that the protocol is run correctly.
+
+Leader election is as *hard* as consensus, but once a leader is elected, consensus can be made easier. It is often a good idea to *try* to elect a leader, but not to *depend* on the leader.
+
+Electing a leader for Paxos at least ensures that, if the leader selection fails and we have, for example, two leaders, we can at least be sure that consensus will be safe.
+
+Given an *oracle* that can solve the election problem, Paxos becomes a *live* protocol.
+
+## Eight Lecture
+
+If we have an asynchronous system, even only *one* crash leads to the impossibility of reaching consensus.
+
+Many other problems can be reduced to the consensus problem, such as leader election (which we saw in the previous lectures).
+
+We recap some properties of consensus protocols:
+* Agreement: All non-faulty processes decide the same value.
+* Validity: If someone decides a value, then it must have been proposed by someone.
+* Termination: All non-faulty processes eventually decide.
+
+We do not care about computational complexity.
+
+In consensus each process first chooses a value, then tries to reach agreement on the value.
+
+Assume that I have a consensus problem over a binary set of values $\left\{ 0, 1 \right\}$, and that I have a set of processes $\left\{ p_1, p_2, \ldots, p_n \right\}$.
+
+We have a 0-valent state, in which all processes vote 0, and a 1-valent state, in which all processes vote 1. Here consensus is trivially reached by agreement and validity.
+
+Now we list each possible $2^n$ states of the systems in a truth-table manner, but we use a code in which only one bit is changed at a time (such as Gray code).
+
+We then must have two configurations that are *adjacent* in the table, and that are *not* in the same valent state (one is 0-valent, the other is 1-valent).
+Then, naturally, there must be a single bit that *discriminates* inbetween these two states. It follows that a single crash can invalidate the protocol.
+
+This proves that *any* FLP protocol is impossible even only with *one* crash.
