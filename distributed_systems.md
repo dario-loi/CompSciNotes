@@ -286,8 +286,8 @@ With this behavior, under the reasonable FIFO-channel assumption, we can reconst
 
 #### Proof of Consistency
 
-Assume that we have $e_i$ and $e_j$ such that $e_i \to e_j$, and that $e_i$ is in the snapshot $C$,
-we want to prove that $e_j$ is also in the snapshot.
+Assume that we have $e_i$ and $e_j$ such that $e_i \to e_j$, and that $e_j$ is in the snapshot $C$,
+we want to prove that $e_i$ is also in the snapshot.
 
 By contradiction, assume that $e_i \not\in C$, then $p_i$ received the snapshot request before $e_i$,
 but then, since the channels are FIFO, and $e_j$ was spawned by a received message from $p_i$, then the broadcasted
