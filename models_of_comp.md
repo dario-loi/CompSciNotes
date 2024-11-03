@@ -3,7 +3,6 @@ author: Dario Loi
 title: Computer Science Course Notes --- 1st Semester
 ---
 
-
 # Models of Computation
 
 ## First Lesson
@@ -443,4 +442,130 @@ C(CIt)x y &\triangleright C(CIt)y x\\
 \end{aligned}
 $$
 
-In order to show that our result is
+## Seventh Lecture
+
+At the beginning of the history of computer science, there was interest on defining the 
+class of *computable functions*, that is, functions that are computed by a *model of computation*.
+
+> A *model of computation* is a combination of a language and an evaluation rule.
+
+It was shown that the following models of computation are equivalent:
+
+* Turing Machines
+* Lambda Calculus
+* Recursive Functions
+
+And that they all compute the same class of functions, the *computable functions*.
+
+Computable functions are sort of recursively defined, in that a computable function is simply
+any function for which there exists a "program" that computes it.
+
+Since we are using *Lambda Calculus* as a model of computation, we are interested in *lambda representable functions*.
+
+We will use a different numeral system (rather than church numerals) for this.
+
+> We define true as $K$, false as $K_*$
+
+$$
+K \coloneqq \lambda x y . x
+$$
+
+$$
+K_* \coloneqq \lambda x y . y
+$$
+
+We then also define the logical implication operator
+
+> if $B$ then $P$ else $Q$
+
+As:
+
+$$
+BPQ
+$$
+
+Which, by the definition of true and false, behaves as expected.
+
+We define the *pairing* operator, for $M, N \in \Lambda$:
+
+$$
+[M, N] = \lambda z.\text{ if } z \text{ then } M \text{ else } N \quad (= \lambda z . z MN)
+$$
+
+This is akin to a *struct* of two elements in C. We can see that $K, K_*$ act as *projection operators* on this pair, accessing either the first or the second element.
+
+$$
+\begin{aligned}
+[M, N] \mathbf{true} & = M,\\
+[M, N] \mathbf{false} & = N,
+\end{aligned}
+$$
+
+We can use this pairing construction for an alternative representation of numbers, as done in Barendregt et al. (1976).
+
+> For each $n \in \mathbb{N}$, the numeral $\hat n$ is defined inductively
+
+We provide this inductive definition:
+
+$$
+\begin{aligned}
+\hat 0 & =  I, &\\
+\hat{n+1} & = [\mathbf{false}, \hat n].\\
+\end{aligned}
+$$
+
+We define the following basic operations on these numerals:
+
+$$
+\begin{aligned}
+S^+ & = \lambda x . [ \mathbf{true}, x],\\
+P^- & = \lambda x . x \mathbf{false},\\
+Z & = \lambda x . x \mathbf{true},\\
+\end{aligned}
+$$
+
+A numeric function
+
+$$
+\phi : \mathbb{N}^p \to \mathbb{N}
+$$
+
+is a $p$-ary function for some $p \in \mathbb{N}$.
+
+A numeric $p$-ary function $\phi$ is called $\lambda$-definable if for some combinator $F$:
+
+$$
+F \hat n_1 \hat n_2 \ldots \hat n_p = \hat{\phi(n_1, n_2, \ldots, n_p)}
+$$
+
+If this holds then the function is said to be $\lambda$-defined by $F$.
+
+We define the *initial functions*
+
+$$
+\begin{aligned}
+  U_i^n &= x_i,\ (1 \leq i \leq n)\\
+  S^+(n) &= n + 1\\
+  Z(n) &= 0\\
+\end{aligned}
+$$
+
+Where $U$ is the projection operator, that can be $\lambda$-defined as:
+
+$$
+U^n_i \coloneqq \lambda x_1 x_2 \dots x_n . x_i \quad \forall n, i \in \mathbb{N},\ 1 \leq i \leq n
+$$
+
+Now, let $P(n)$ be a numeric relation. As usual:
+
+$$
+\mu m [ P(m)]
+$$
+
+Denotes the *least* number $m$ s.t $P(m)$ holds.
+
+Now, let $A$ be a class of numeric functions s.t:
+
+1. $A$ is *closed under composition* if  $$ \forall \phi x ( \phi_1(\hat n), \dots, \phi_m (\hat n))$$ with $x, \phi_1, \dots, \phi_m \in A$, one has $\phi \in A$.
+2. $A$ is *closed under primitive recursion* if for all $\phi$ defined by: $$\phi(\hat 0, \hat n) = \chi \hat n$$ $$\phi(m+1, \hat n) = \psi(\phi(m, \hat n), m, \hat n)$$ with $x, \psi \in A$, one has $\phi \in A$.
+3. WRITE MINIMALIZATION.

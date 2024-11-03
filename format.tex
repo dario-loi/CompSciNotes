@@ -4,3 +4,9 @@
 \usepackage[T1]{fontenc}
 \usepackage{kpfonts,baskervald}
 \usepackage{inconsolata}
+
+\newcommand{\squarequotes}[2][0]{{%
+  {\vphantom{#2}}^{\ulcorner}\kern-\scriptspace
+  \mspace{-#1mu}%
+  {{}#2}^{\urcorner}%
+}}

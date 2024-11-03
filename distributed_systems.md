@@ -475,3 +475,43 @@ We then must have two configurations that are *adjacent* in the table, and that 
 Then, naturally, there must be a single bit that *discriminates* inbetween these two states. It follows that a single crash can invalidate the protocol.
 
 This proves that *any* FLP protocol is impossible even only with *one* crash.
+
+## Ninth Lecture
+
+We discuss *Randomized Consensus*
+
+In this problem we have $n$ processes, each process proposes a value. The inter-process communication
+is *asynchronous*, and the processes can *crash*.
+
+The algorithm that we will introduce is called *Ben-Or*, it can tolerate up to $t = \left\lfloor \frac{n-1}{2} \right\rfloor$ failures.
+
+We follow up with some python-like pseudocode
+
+```py
+preference = input_data
+round_n = 1
+
+while True:
+    send(1, round_n, preference) # to everyone
+    wait(1, round_n, *) # for all n-t process IDs
+    if received more than n/2 (1, round_n, v) messages:
+        send(2, round_n, 2, ratify) # to everyone
+    else:
+        send(2, round_n, ???) # to everyone
+    wait(2, round_n, *) # for all n-t process IDs
+    if received one (2, round_n, v, ratify) message:
+        preference = v
+        if received more than t (2, round_n, v, ratify) messages:
+            return v
+    else:
+        preference = random() # between 0 and 1
+    round_n += 1
+```
+
+We then list some properties:
+
+1. At most one value can get a majority in phase 1.
+2. If some process sees $t+1$ (2, round, v, ratify) messages, then everybody sees at least one (2, round, v, ratify) message.
+3. If every process has received at least one (2, round, v, ratify) then every process will vote for v in round $round+1$. 
+
+This protocol is not important for practical purposes, but it is important for theoretical purposes, since we prove that randomization can overcome the FLP impossibility result.
