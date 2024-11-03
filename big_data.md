@@ -206,13 +206,13 @@ We can use smart reduction techniques common in IPC (Inter-Process Communication
 
 We keep a table of operations and total volume of communication:
 
-| Operation | Volume | Steps
-|-----------|--------|-----|
-| Ideal       | $n$    | 1   |
-| Parameter Server | $max(n, \dfrac{pn}{k})$ | 1 |
-| Näive AllReduce | $(p-1)\cdot n$ | 1 |
-| Ring AllReduce | $2\cdot N$ | $2 (p-1)$ |
-| Bandwidth-optimal recursive doubling | $2\cdot N$ | $2\log_2(p)$ |
+| Operation                            | Volume                  | Steps        |
+| ------------------------------------ | ----------------------- | ------------ |
+| Ideal                                | $n$                     | 1            |
+| Parameter Server                     | $max(n, \dfrac{pn}{k})$ | 1            |
+| Näive AllReduce                      | $(p-1)\cdot n$          | 1            |
+| Ring AllReduce                       | $2\cdot N$              | $2 (p-1)$    |
+| Bandwidth-optimal recursive doubling | $2\cdot N$              | $2\log_2(p)$ |
 
 We explain each:
 
@@ -353,13 +353,13 @@ It is simply the multiplication between the number of cut links, and the bandwid
 
 We produce a table for these metrics on different topologies:
 
-| Topology  | Diameter        | Bisection Cut           | 
-|-----------|-----------------|-------------------------|
-| Chain     | $N$             | $1$                     |
-| Ring      | $N/2$           | $2$                     |
-| Mesh      | $2(\sqrt{N}-1)$ | $\sqrt{N}$              |
-| Torus     | $\sqrt{N}$      | $2\sqrt{N}$             |
-| Trees     | $1$             | $2 \cdot \log_{r-1}(N)$ |
+| Topology | Diameter        | Bisection Cut           |
+| -------- | --------------- | ----------------------- |
+| Chain    | $N$             | $1$                     |
+| Ring     | $N/2$           | $2$                     |
+| Mesh     | $2(\sqrt{N}-1)$ | $\sqrt{N}$              |
+| Torus    | $\sqrt{N}$      | $2\sqrt{N}$             |
+| Trees    | $1$             | $2 \cdot \log_{r-1}(N)$ |
 
 ### Trees
 
@@ -673,10 +673,10 @@ sends metadata about the connection, and the NIC uses it to send/receive message
 Network I/O happens by posting work requests (WRs) to the QP (essentially commands).
 
 ---------------
-| RDMA | Socket (TCP/IP)|
-|------|-------|
-| Buffers to/from which we want to `recv`/`send` data must be preregistered| Every `send`/`recv` can be done on a different buffer without the need for registration
-|They can be re-used multiple times, the NIC knows where to write/read data| For every `send`/`recv` we must pay a "control" overhead at each step in order to specify the buffer
+| RDMA                                                                       | Socket (TCP/IP)                                                                                      |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Buffers to/from which we want to `recv`/`send` data must be preregistered  | Every `send`/`recv` can be done on a different buffer without the need for registration              |
+| They can be re-used multiple times, the NIC knows where to write/read data | For every `send`/`recv` we must pay a "control" overhead at each step in order to specify the buffer |
 
 #### One-Sided Operations
 
@@ -723,10 +723,10 @@ Not all verbs can be used in each transport mode:
 
 ---------------------------------------------
 | Mode | SEND/RECV | WRITE | READ | WQE header |
-|----|-----|-----|-----|--|
-| RC | Yes | Yes | Yes | 36 B |
-| UC | Yes | Yes | No | 36 B |
-| UD | Yes | No | No | 68 B |
+| ---- | --------- | ----- | ---- | ---------- |
+| RC   | Yes       | Yes   | Yes  | 36 B       |
+| UC   | Yes       | Yes   | No   | 36 B       |
+| UD   | Yes       | No    | No   | 68 B       |
 
 
 #### RoCE
