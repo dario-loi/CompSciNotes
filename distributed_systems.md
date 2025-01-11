@@ -343,7 +343,7 @@ Logs are a sequence of events that are written to a file, and are used to recove
 We assume the records to be consistent, so that system failures do not corrupt the log. This means that the log is written
 to a stable storage, such as a disk.
 
-Logs allow a system to be fault-tolerance since they can be used to recover the state of the system in case of failure.
+Logs allow a system to be fault-tolerant since they can be used to recover the state of the system in case of failure.
 
 You can have *two* types of behavior when logging, depending on the order of the operations:
 
@@ -457,6 +457,7 @@ If we have an asynchronous system, even only *one* crash leads to the impossibil
 Many other problems can be reduced to the consensus problem, such as leader election (which we saw in the previous lectures).
 
 We recap some properties of consensus protocols:
+
 * Agreement: All non-faulty processes decide the same value.
 * Validity: If someone decides a value, then it must have been proposed by someone.
 * Termination: All non-faulty processes eventually decide.
@@ -486,6 +487,9 @@ is *asynchronous*, and the processes can *crash*.
 The algorithm that we will introduce is called *Ben-Or*, it can tolerate up to $t = \left\lfloor \frac{n-1}{2} \right\rfloor$ failures.
 
 We follow up with some python-like pseudocode
+
+<div style="page-break-after: always;"></div>
+
 
 ```py
 preference = input_data
